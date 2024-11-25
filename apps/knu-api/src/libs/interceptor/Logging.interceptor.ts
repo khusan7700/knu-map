@@ -7,15 +7,19 @@ import { tap } from 'rxjs/operators';
 export class LoggingInterceptor implements NestInterceptor {
 	private readonly logger: Logger = new Logger();
 
-	public intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+	intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
 		const recordTime = Date.now();
-		const requestType = context.getType<GqlContextType>();
+		const type = context.getType();
+		this.logger.log(`Type ${type}`, 'REQUEST');
 
-		if (requestType === 'http') {
-			//Develop if needed!
-		} else if (requestType === 'graphql') {
+		if (type === 'http') {
+			console.log('HTTP ------> request');
+		} else {
 			/** (1) Print Request */
+			console.log('GraphQL------> request');
+
 			const gqlContext = GqlExecutionContext.create(context);
+
 			this.logger.log(` ${this.stringify(gqlContext.getContext().req.body)}`, 'REQUEST');
 
 			/** (2) Errors handing cia GraphQL */
@@ -29,8 +33,26 @@ export class LoggingInterceptor implements NestInterceptor {
 				}),
 			);
 		}
+		return next.handle().pipe(
+			tap(() => {
+				const responseTime = Date.now() - recordTime;
+				this.logger.log(`${responseTime}ms`, 'RESPONSE');
+			}),
+		);
 	}
 	private stringify(context: ExecutionContext): string {
-		return JSON.stringify(context).slice(0, 75);
+		return JSON.stringify(context).slice(0, 100);
 	}
 }
+/*
+@Injectable()
+export class LoggingInterceptor implements NestInterceptor {
+	intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+		console.log('Before...');
+
+		const now = Date.now();
+		return next.handle().pipe(tap(() => console.log(`After... ${Date.now() - now}ms`)));
+	}
+}
+
+*/
