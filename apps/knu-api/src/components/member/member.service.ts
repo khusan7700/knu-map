@@ -1,11 +1,13 @@
 import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, ObjectId } from 'mongoose';
 import { Member } from '../../libs/dto/member/member';
 import { LoginInput, MemberInput } from '../../libs/dto/member/member.input';
 import { MemberStatus } from '../../libs/enums/member.enum';
 import { Message } from '../../libs/enums/common.enum';
 import { AuthService } from '../auth/auth.service';
+import { MemberUpdate } from '../../libs/dto/member/member.update';
+import { exec } from 'child_process';
 
 @Injectable()
 export class MemberService {
@@ -13,6 +15,7 @@ export class MemberService {
 		@InjectModel('Member') private readonly memberModel: Model<Member>,
 		private authService: AuthService,
 	) {}
+	//-------------------------------signup---------------------------------------
 
 	public async signup(input: MemberInput): Promise<Member> {
 		input.memberPassword = await this.authService.hashPassword(input.memberPassword);
@@ -25,6 +28,7 @@ export class MemberService {
 			throw new BadRequestException(Message.USED_MEMBER_NICK_OR_PHONE);
 		}
 	}
+	//-------------------------------login---------------------------------------
 
 	public async login(input: LoginInput): Promise<Member> {
 		const { memberNick, memberPassword } = input;
@@ -46,22 +50,45 @@ export class MemberService {
 
 		return response;
 	}
+	//------------------------------------UPDATE------------------------------------
 
-	public async updateMember(): Promise<string> {
-		return 'updateMember executed';
+	public async updateMember(memberId: ObjectId, input: MemberUpdate): Promise<Member> {
+		const result: Member = await this.memberModel
+			.findOneAndUpdate(
+				{
+					_id: memberId,
+					memberStatus: MemberStatus.ACTIVE,
+				},
+				input,
+				{ new: true },
+			)
+			.exec();
+		if (!result) throw new InternalServerErrorException(Message.UPLOAD_FAILED);
+
+		result.accessToken = await this.authService.createToken(result);
+		return result;
 	}
 
+	//----------------------------------GET MEMBER-----------------------------------
 	public async getMember(): Promise<string> {
 		return 'getMember executed';
 	}
 
-	// -----------ADMIN------------
+	//----------------------------------GET AGENTS-----------------------------------
+	//--------------------------------like Target Member-------------------------------------
+
+	/**  									 ADMIN 									**/
+	//---------------------------------get All Members By Admin------------------------------------
 
 	public async getAllMembersByAdmin(): Promise<string> {
 		return 'getAllMembersByAdmin executed';
 	}
 
+	//------------------------------update Member By Admin----------------------------------
 	public async updateMemberByAdmin(): Promise<string> {
 		return 'updateMemberByAdmin executed';
 	}
+
+	//--------------------------------Check subscribtion--------------------------------
+	//--------------------------------memberStatsEditor--------------------------------
 }

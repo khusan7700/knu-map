@@ -9,37 +9,47 @@ import { ObjectId } from 'mongoose';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { MemberType } from '../../libs/enums/member.enum';
 import { RolesGuard } from '../auth/guards/roles.guard';
+import { MemberUpdate } from '../../libs/dto/member/member.update';
 
 @Resolver()
 export class MemberResolver {
 	constructor(private readonly memberService: MemberService) {}
 
+	//-------------------------SIGNUP---------------------------
 	@Mutation(() => Member)
 	public async signup(@Args('input') input: MemberInput): Promise<Member> {
 		console.log('Mutation: signup');
-		return this.memberService.signup(input);
+		console.log('input', input);
+		return await this.memberService.signup(input);
 	}
 
+	//-------------------------LOGIN---------------------------
 	@Mutation(() => Member)
 	public async login(@Args('input') input: LoginInput): Promise<Member> {
 		console.log('Mutation: login');
-		return this.memberService.login(input);
+		return await this.memberService.login(input);
 	}
 
+	//-------------------------UPDATE---------------------------
 	@UseGuards(AuthGuard)
-	@Mutation(() => String)
-	public async updateMember(@AuthMember('_id') memberId: ObjectId): Promise<string> {
+	@Mutation(() => Member)
+	public async updateMember(
+		@Args('input') input: MemberUpdate,
+		@AuthMember('_id') memberId: ObjectId,
+	): Promise<Member> {
 		console.log('Mutation: updateMember');
-		return this.memberService.updateMember();
+		delete input._id;
+		return this.memberService.updateMember(memberId, input);
 	}
 
+	//-------------------------CHECKAUTH---------------------------
 	@UseGuards(AuthGuard)
 	@Mutation(() => String)
 	public async checkAuth(@AuthMember('memberNick') memberNick: string): Promise<string> {
 		console.log('Mutation: checkAuth');
 		return `Hi ${memberNick}`;
 	}
-
+	//-------------------------checkAuthRoles---------------------------
 	@Roles(MemberType.STUDENT, MemberType.TEACHER)
 	@UseGuards(RolesGuard)
 	@Mutation(() => String)
@@ -48,13 +58,16 @@ export class MemberResolver {
 		return `Hi ${AuthMember.memberNick},you are ${AuthMember.memberType} (memberId: ${AuthMember._id})`;
 	}
 
+	//-------------------------GET MEMBER---------------------------
 	@Query(() => String)
 	public async getMember(): Promise<string> {
 		console.log('Query: getMember');
 		return this.memberService.getMember();
 	}
 
-	// -----------ADMIN------------
+	/**  								ADMIN 									**/
+
+	//-------------------------get All Members By Admin---------------------------
 
 	@Roles(MemberType.ADMIN)
 	@UseGuards(RolesGuard)
@@ -64,9 +77,14 @@ export class MemberResolver {
 		return this.memberService.getAllMembersByAdmin();
 	}
 
+	//--------------------------update Member By Admin--------------------------
 	@Query(() => String)
 	public async updateMemberByAdmin(): Promise<string> {
 		console.log('Query: updateMemberByAdmin');
 		return this.memberService.updateMemberByAdmin();
 	}
+
+	//--------------------------image Uploader-------------------------
+
+	//--------------------------images Uploader-------------------------
 }
