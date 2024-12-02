@@ -12,6 +12,9 @@ import { ViewGroup } from '../../libs/enums/view.enum';
 import { ViewInput } from '../../libs/dto/view/view.input';
 import { Member, Members } from '../../libs/dto/member/member';
 import { lookupAuthMemberLiked } from '../../libs/config';
+import { LikeInput } from '../../libs/dto/like/like.input';
+import { LikeGroup } from '../../libs/enums/like.enum';
+import { LikeService } from '../like/like.service';
 
 @Injectable()
 export class MemberService {
@@ -19,6 +22,7 @@ export class MemberService {
 		@InjectModel('Member') private readonly memberModel: Model<Member>,
 		private authService: AuthService,
 		private viewService: ViewService,
+		private likeService: LikeService,
 	) {}
 	//-------------------------------signup---------------------------------------
 
@@ -127,6 +131,37 @@ export class MemberService {
 	}
 	//--------------------------------like Target Member-------------------------------------
 
+	public async likeTargetMember(memberId: ObjectId, likeRefId: ObjectId): Promise<Member> {
+		const member = await this.memberModel.findById(memberId).exec();
+		const target: Member = await this.memberModel.findOne({ _id: likeRefId, memberStatus: MemberStatus.ACTIVE }).exec();
+		if (!target) throw new InternalServerErrorException(Message.NO_DATA_FOUND);
+
+		const input: LikeInput = {
+			memberId: memberId,
+			likeRefId: likeRefId,
+			likeGroup: LikeGroup.MEMBER,
+		};
+
+		const modifier: number = await this.likeService.toggleLike(input);
+		const result = await this.memberStatsEditor({ _id: likeRefId, targetKey: 'memberLikes', modifier: modifier });
+		if (!result) throw new InternalServerErrorException(Message.SOMETHING_WENT_WRONG);
+
+		/*
+		if (modifier > 0) {
+			// Assuming modifier > 0 means a like was added
+			await this.notificationService.createNotification(memberId, {
+				notificationType: NotificationType.LIKE,
+				notificationGroup: NotificationGroup.MEMBER,
+				notificationTitle: 'New Like',
+				notificationDesc: `${member.memberNick} liked you!`,
+				authorId: memberId,
+				receiverId: likeRefId,
+			});
+		}
+			*/
+
+		return result;
+	}
 	/**  									 ADMIN 									**/
 	//---------------------------------get All Members By Admin------------------------------------
 
