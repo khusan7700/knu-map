@@ -171,7 +171,6 @@ export class MemberService {
 		*/
 	//--------------------------------memberStatsEditor--------------------------------
 	public async memberStatsEditor(input: StatisticModifier): Promise<Member> {
-		console.log('executed---->OK');
 		const { _id, targetKey, modifier } = input;
 		return await this.memberModel
 			.findByIdAndUpdate(
