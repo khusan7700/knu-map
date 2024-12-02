@@ -31,7 +31,7 @@ export class PropertyInput {
 
 	@IsNotEmpty()
 	@Field(() => [String])
-	propertyImages: string[];
+	propertyImages?: string[];
 
 	@IsOptional()
 	@Length(5, 500)
@@ -47,15 +47,6 @@ export class PropertyInput {
 
 @InputType()
 export class PricesRange {
-	@Field(() => Int)
-	start: number;
-
-	@Field(() => Int)
-	end: number;
-}
-
-@InputType()
-export class SquaresRange {
 	@Field(() => Int)
 	start: number;
 
@@ -87,14 +78,6 @@ export class PISearch {
 	typeList?: PropertyType[];
 
 	@IsOptional()
-	@Field(() => [Int], { nullable: true })
-	roomsList?: Number[];
-
-	@IsOptional()
-	@Field(() => [Int], { nullable: true })
-	bedsList?: Number[];
-
-	@IsOptional()
 	@IsIn(availableOptions, { each: true })
 	@Field(() => [String], { nullable: true })
 	options?: string[];
@@ -106,10 +89,6 @@ export class PISearch {
 	@IsOptional()
 	@Field(() => PeriodsRange, { nullable: true })
 	periodsRange?: PeriodsRange;
-
-	@IsOptional()
-	@Field(() => SquaresRange, { nullable: true })
-	squaresRange?: SquaresRange;
 
 	@IsOptional()
 	@Field(() => String, { nullable: true })

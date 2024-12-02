@@ -40,7 +40,7 @@ export class Property {
 	propertyRank: number;
 
 	@Field(() => [String])
-	propertyImages: string[];
+	propertyImages?: string[];
 
 	@Field(() => String, { nullable: true })
 	propertyDesc?: string;
