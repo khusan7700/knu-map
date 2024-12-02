@@ -1,5 +1,4 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
-import { MemberAuthType, MemberStatus, MemberType } from '../../enums/member.enum';
 import { PropertyLocation, PropertyStatus, PropertyType } from '../../enums/property.enum';
 import { ObjectId } from 'mongoose';
 import { Member, TotalCounter } from '../member/member';
