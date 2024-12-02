@@ -69,10 +69,8 @@ export class PropertyService {
 				targetProperty.propertyViews++;
 			}
 			//----------------------------------like-----------------------------------
-			// const likeInput = { memberId: memberId, likeRefId: propertyId, likeGroup: LikeGroup.PROPERTY };
-			// targetProperty.meLiked = await this.likeService.checkLikeExistence(likeInput);
-
-			//meLiked
+			const likeInput = { memberId: memberId, likeRefId: propertyId, likeGroup: LikeGroup.PROPERTY };
+			targetProperty.meLiked = await this.likeService.checkLikeExistence(likeInput);
 		}
 
 		targetProperty.memberData = await this.memberService.getMember(null, targetProperty.memberId);
