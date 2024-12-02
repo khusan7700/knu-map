@@ -73,4 +73,17 @@ export class PropertyResolver {
 		console.log('Query: getProperties');
 		return await this.propertyService.getProperties(memberId, input);
 	}
+
+	//---------------------------GET AGENT  PROPERTY--------------------------
+
+	@Roles(MemberType.TEACHER)
+	@UseGuards(RolesGuard)
+	@Query((returns) => Properties)
+	public async getAgentProperties(
+		@Args('input') input: AgentPropertiesInquiry,
+		@AuthMember('_id') memberId: ObjectId,
+	): Promise<Properties> {
+		console.log('Mutation: getAgentProperties');
+		return await this.propertyService.getAgentProperties(memberId, input);
+	}
 }
