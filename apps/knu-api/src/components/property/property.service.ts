@@ -140,6 +140,16 @@ export class PropertyService {
 		return result[0];
 	}
 
+	//---------------------------GET FAVORITES--------------------------
+	public async getFavorites(memberId: ObjectId, input: OrdinaryInquiry): Promise<Properties> {
+		return await this.likeService.getFavoriteProperties(memberId, input);
+	}
+
+	//---------------------------GET VISITED--------------------------
+	public async getVisited(memberId: ObjectId, input: OrdinaryInquiry): Promise<Properties> {
+		return await this.viewService.getVisitedProperties(memberId, input);
+	}
+
 	private shapeMatchQuery(match: T, input: PropertiesInquiry): void {
 		const { memberId, locationList, typeList, periodsRange, pricesRange, options, text } = input.search;
 		if (memberId) match.memberId = shapeIntoMongoObjectId(memberId);
